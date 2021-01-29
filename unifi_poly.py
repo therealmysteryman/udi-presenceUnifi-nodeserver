@@ -113,9 +113,9 @@ class Controller(polyinterface.Controller):
         
         ctrl = unifictl(self.unifi_host,self.unifi_userid,self.unifi_password,self.unifi_port,site_id=self.unifi_siteid,ssl_verify=False)
         
-        for device in self.mac_device.split(','):
-            name =  device.replace(":","") 
-            self.addNode(Device(self,self.address,name,name,ctrl,device ))
+        for netdevice in self.mac_device.split(','):
+            mac =  netdevice.replace(":","") 
+            self.addNode(NetDevice(self,self.address,name,name,ctrl,mac ))
 
     def delete(self):
         LOGGER.info('Deleting Unifi')
@@ -148,7 +148,7 @@ class Controller(polyinterface.Controller):
     }
     drivers = [{'driver': 'ST', 'value': 1, 'uom': 2}]
 
-class Device(polyinterface.Node):
+class NetDevice(polyinterface.Node):
 
     def __init__(self, controller, primary, address, name,ctrl, mac):
 
@@ -165,8 +165,7 @@ class Device(polyinterface.Node):
         
     def update(self):
         try :
-            clients = self.unifiCtr.get_clients()
-            print( clients.get_client(mac) )
+            print(  self.unifiCtr.get_client(self.mac) )
             self.setDriver('GV1',0)
         except Exception as ex :
             LOGGER.error('update: %s', str(ex))
