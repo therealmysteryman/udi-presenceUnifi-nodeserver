@@ -33,7 +33,7 @@ class Controller(polyinterface.Controller):
 
     def __init__(self, polyglot):
         super(Controller, self).__init__(polyglot)
-        self.name = 'Twinkly'
+        self.name = 'UnifiCtrl'
         self.queryON = False
         self.hb = 0
         self.unifi_host = ""
@@ -152,7 +152,7 @@ class NetDevice(polyinterface.Node):
 
     def __init__(self, controller, primary, address, name,ctrl, mac):
 
-        super(Device, self).__init__(controller, primary, address, name)
+        super(NetDevice, self).__init__(controller, primary, address, name)
         self.queryON = True
         self.deviceMac = mac
         self.unifiCtrl = ctrl
@@ -165,7 +165,7 @@ class NetDevice(polyinterface.Node):
         
     def update(self):
         try :
-            print(  self.unifiCtr.get_client(self.mac) )
+            print( self.unifiCtrl.get_client(self.mac) )
             self.setDriver('GV1',0)
         except Exception as ex :
             LOGGER.error('update: %s', str(ex))
