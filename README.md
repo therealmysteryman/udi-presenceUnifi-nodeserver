@@ -1,4 +1,4 @@
-# UniFi Presence Detection Polyglot V2 Node Server
+# UniFi Device Network Presence Detection Polyglot V2 Node Server
 
 ![Build Status](https://travis-ci.org/therealmysteryman/udi-twinkly-nodeserver.svg?branch=master)
 
