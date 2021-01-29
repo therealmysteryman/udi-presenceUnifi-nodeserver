@@ -166,8 +166,13 @@ class NetDevice(polyinterface.Node):
         
     def update(self):
         try :
-            print(self.unifiCtrl.get_client(self.deviceMac)) 
-            self.setDriver('GV1',1)
+            if ( 'essid' in self.unifiCtrl.get_client(self.deviceMac) ) :
+                print("found")
+                self.setDriver('GV1',1)
+            else:
+                print ("notfound")
+                self.setDriver('GV1',0)
+            
         except Exception as ex :
             self.setDriver('GV1',0)
             LOGGER.info('update: %s', str(ex))
