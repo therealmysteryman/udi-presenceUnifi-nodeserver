@@ -77,7 +77,7 @@ class Controller(polyinterface.Controller):
             else:
                 self.mac_device = ""      
                                 
-            if self.unifi_host == "" or self.unifi_userid == "" or self.unifi_password == "" or self.mac_device == "" 
+            if self.unifi_host == "" or self.unifi_userid == "" or self.unifi_password == "" or self.mac_device == "" :
                 LOGGER.error('Unifi requires \'unifi_host\' \'unifi_userid\' \'unifi_password\' \'mac_device\' parameters to be specified in custom configuration.')
                 return False
             else:
