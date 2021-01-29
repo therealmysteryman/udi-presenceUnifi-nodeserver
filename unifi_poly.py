@@ -11,6 +11,7 @@ import warnings
 import time
 import json
 import sys
+from urllib.parse import quote
 from copy import deepcopy
 from pyunifi.controller import Controller as unifictl
 
@@ -166,7 +167,7 @@ class NetDevice(polyinterface.Node):
     def update(self):
         try :
             print(self.deviceMac)
-            print( self.unifiCtrl.get_client(urllib.quote(self.deviceMac) )
+            print( self.unifiCtrl.get_client(quote(self.deviceMac) )
             self.setDriver('GV1',0)
         except Exception as ex :
             LOGGER.error('update: %s', str(ex))
