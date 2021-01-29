@@ -166,7 +166,7 @@ class NetDevice(polyinterface.Node):
         
     def update(self):
         try :
-            self.unifiCtrl.get_client('f0:9f:c2:30:15:33') 
+            self.unifiCtrl.get_client(quote('f0:9f:c2:30:15:33')) 
             self.setDriver('GV1',1)
         except Exception as ex :
             self.setDriver('GV1',0)
