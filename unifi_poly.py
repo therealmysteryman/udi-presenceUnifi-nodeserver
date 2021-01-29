@@ -12,6 +12,7 @@ import time
 import json
 import sys
 from copy import deepcopy
+from pyunifi.controller import Controller as unifictl
 
 LOGGER = polyinterface.LOGGER
 SERVERDATA = json.load(open('server.json'))
@@ -109,9 +110,12 @@ class Controller(polyinterface.Controller):
             self.hb = 0
 
     def discover(self, *args, **kwargs):
+        
+        ctrl = Controller(self.unifi_host,self.unifi_userid,self.unifi_password,self.unifi_port,site_id=self.unifi_siteid,ssl_verify=False)
+        
         for device in self.mac_device.split(','):
             name =  host.replace(":","") 
-            self.addNode(Device(self,self.address, name , name, device ))
+            self.addNode(Device(self,self.address,name,name,ctrl,device ))
 
     def delete(self):
         LOGGER.info('Deleting Unifi')
@@ -146,11 +150,12 @@ class Controller(polyinterface.Controller):
 
 class Device(polyinterface.Node):
 
-    def __init__(self, controller, primary, address, name, mac):
+    def __init__(self, controller, primary, address, name,ctrl, mac):
 
         super(Device, self).__init__(controller, primary, address, name)
         self.queryON = True
         self.deviceMac = mac
+        self.unifiCtrl = ctrl
 
     def start(self):
         self.update()
@@ -160,6 +165,8 @@ class Device(polyinterface.Node):
         
     def update(self):
         try :
+            clients = self.unifiCtr.get_clients()
+            print( clients.get_client(mac) )
             self.setDriver('GV1',0)
         except Exception as ex :
             LOGGER.error('update: %s', str(ex))
