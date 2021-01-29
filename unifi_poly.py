@@ -116,7 +116,7 @@ class Controller(polyinterface.Controller):
         
         for netdevice in self.mac_device.split(','):
             name =  netdevice.replace(":","") 
-            self.addNode(NetDevice(self,self.address,name,name,ctrl,self.mac_device ))
+            self.addNode(NetDevice(self,self.address,name,name,ctrl,netdevice ))
 
     def delete(self):
         LOGGER.info('Deleting Unifi')
