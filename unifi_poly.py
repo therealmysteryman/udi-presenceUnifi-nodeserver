@@ -166,7 +166,7 @@ class NetDevice(polyinterface.Node):
     def update(self):
         try :
             print(self.deviceMac)
-            print( self.unifiCtrl.get_clients() )
+            print( self.unifiCtrl.get_client(self.deviceMac) )
             self.setDriver('GV1',0)
         except Exception as ex :
             LOGGER.error('update: %s', str(ex))
