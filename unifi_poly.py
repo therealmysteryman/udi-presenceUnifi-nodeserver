@@ -7,14 +7,11 @@ based on the NodeServer template for Polyglot v2 written in Python2/3 by Einstei
 
 import polyinterface
 import hashlib
-import asyncio
 import warnings 
 import time
 import json
 import sys
 from copy import deepcopy
-from twinkly_client import TwinklyClient
-from aiohttp import ClientSession, ClientTimeout
 
 LOGGER = polyinterface.LOGGER
 SERVERDATA = json.load(open('server.json'))
@@ -37,27 +34,57 @@ class Controller(polyinterface.Controller):
         super(Controller, self).__init__(polyglot)
         self.name = 'Twinkly'
         self.queryON = False
-        self.host = ""
         self.hb = 0
+        self.unifi_host = ""
+        self.unifi_port = ""
+        self.unifi_userid = "" 
+        self.unifi_password = ""
+        self.unifi_siteid = ""
+        self.mac_device = ""
 
     def start(self):
-        LOGGER.info('Started Twinkly for v2 NodeServer version %s', str(VERSION))
+        LOGGER.info('Started Unifi for v2 NodeServer version %s', str(VERSION))
         self.setDriver('ST', 0)
         try:
-            if 'host' in self.polyConfig['customParams']:
-                self.host = self.polyConfig['customParams']['host']
+            if 'unifi_host' in self.polyConfig['customParams']:
+                self.unifi_host = self.polyConfig['customParams']['unifi_host']
             else:
-                self.host = ""
-
-            if self.host == "" :
-                LOGGER.error('Twinkly requires \'host\' parameters to be specified in custom configuration.')
+                self.unifi_host = ""
+                
+            if 'unifi_port' in self.polyConfig['customParams']:
+                self.unifi_port = self.polyConfig['customParams']['unifi_port']
+            else:
+                self.unifi_port = "8443"    
+            
+            if 'unifi_userid' in self.polyConfig['customParams']:
+                self.unifi_userid = self.polyConfig['customParams']['unifi_userid']
+            else:
+                self.unifi_userid = ""
+            
+            if 'unifi_password' in self.polyConfig['customParams']:
+                self.unifi_password = self.polyConfig['customParams']['unifi_password']
+            else:
+                self.unifi_password = ""
+            
+            if 'unifi_siteid' in self.polyConfig['customParams']:
+                self.unifi_siteid = self.polyConfig['customParams']['unifi_siteid']
+            else:
+                self.unifi_siteid = "default"  
+                
+            if 'mac_device' in self.polyConfig['customParams']:
+                self.mac_device = self.polyConfig['customParams']['mac_device']
+            else:
+                self.mac_device = ""      
+                                
+            if self.unifi_host == "" or self.unifi_userid == "" or self.unifi_password == "" or self.mac_device == "" 
+                LOGGER.error('Unifi requires \'unifi_host\' \'unifi_userid\' \'unifi_password\' \'mac_device\' parameters to be specified in custom configuration.')
                 return False
             else:
                 self.check_profile()
                 self.discover()
                 
         except Exception as ex:
-            LOGGER.error('Error starting Twinkly NodeServer: %s', str(ex))
+            LOGGER.error('Error starting Unifi NodeServer: %s', str(ex))
            
     def shortPoll(self):
         self.setDriver('ST', 1)
@@ -82,12 +109,9 @@ class Controller(polyinterface.Controller):
             self.hb = 0
 
     def discover(self, *args, **kwargs):
-        count = 1
-        for host in self.host.split(','):
-            uniq_name = "t" + "_" + host.replace(".","") + "_" + str(count)
-            myhash =  str(int(hashlib.md5(uniq_name.encode('utf8')).hexdigest(), 16) % (10 ** 8))
-            self.addNode(TwinklyLight(self,self.address, myhash , uniq_name, host ))
-            count = count + 1
+        for device in self.mac_device.split(','):
+            name =  host.replace(":","") 
+            self.addNode(Device(self,self.address, name , name, device ))
 
     def delete(self):
         LOGGER.info('Deleting Twinkly')
@@ -120,91 +144,35 @@ class Controller(polyinterface.Controller):
     }
     drivers = [{'driver': 'ST', 'value': 1, 'uom': 2}]
 
-class TwinklyLight(polyinterface.Node):
+class Device(polyinterface.Node):
 
-    def __init__(self, controller, primary, address, name, host):
+    def __init__(self, controller, primary, address, name, mac):
 
-        super(TwinklyLight, self).__init__(controller, primary, address, name)
+        super(Device, self).__init__(controller, primary, address, name)
         self.queryON = True
-        self.myHost = host
+        self.deviceMac = mac
 
     def start(self):
         self.update()
 
     def query(self):
         self.reportDrivers()
-
-    def setOn(self, command):
-        try:
-            asyncio.run(self._turnOn())
-            self.setDriver('ST', 100)
-        except Exception as ex:
-            LOGGER.error('setOn: %s', str(ex))
-        
-    def setOff(self, command):
-        try :
-            asyncio.run(self._turnOff())
-            self.setDriver('ST', 0)
-        except Exception as ex:
-            LOGGER.error('setOff: %s', str(ex))
-    
-    def setBrightness(self, command):
-        try:
-            asyncio.run(self._setBrightness(int(command.get('value'))))
-            self.setDriver('GV1', int(command.get('value')))
-        except Exception as ex:
-            LOGGER.error('setBrightness: %s', str(ex))
         
     def update(self):
         try :
-            if ( asyncio.run(self._isOn()) ) :
-                self.setDriver('ST', 100)
-            else :
-                self.setDriver('ST', 0)
-            self.setDriver('GV1', asyncio.run(self._getBri()))
+            self.setDriver('GV1',0)
         except Exception as ex :
             LOGGER.error('update: %s', str(ex))
-
-    async def _isOn(self) : 
-        cs = ClientSession(raise_for_status=True, timeout=ClientTimeout(total=3))
-        isOn = await TwinklyClient(self.myHost,cs).get_is_on()
-        await cs.close()
-        return isOn
-        
-    async def _getBri(self) : 
-        cs = ClientSession(raise_for_status=True, timeout=ClientTimeout(total=3))
-        intBri = await TwinklyClient(self.myHost,cs).get_brightness()
-        await cs.close()
-        return intBri
-    
-    async def _turnOff(self) :
-        cs = ClientSession(raise_for_status=True, timeout=ClientTimeout(total=3))
-        tc = await TwinklyClient(self.myHost,cs).set_is_on(False)
-        await cs.close()
-        
-    async def _turnOn(self) :
-        cs = ClientSession(raise_for_status=True, timeout=ClientTimeout(total=3))
-        tc = await TwinklyClient(self.myHost,cs).set_is_on(True)
-        await cs.close()
-        
-    async def _setBrightness(self,bri) :
-        cs = ClientSession(raise_for_status=True, timeout=ClientTimeout(total=3))
-        await TwinklyClient(self.myHost,cs).set_brightness(bri)
-        await cs.close()
             
-    drivers = [{'driver': 'ST', 'value': 0, 'uom': 78},
-               {'driver': 'GV1', 'value': 0, 'uom': 51}]
+    drivers = [{'driver': 'GV1', 'value': 0, 'uom': 2}]
 
-    id = 'TWINKLY_LIGHT'
+    id = 'UNIFI_DEVICE'
     commands = {
-                    'DON': setOn,
-                    'DOF': setOff,
-                    'SET_BRI': setBrightness
                 }
 
 if __name__ == "__main__":
     try:
-        polyglot = polyinterface.Interface('TwinklyNodeServer')
+        polyglot = polyinterface.Interface('UnifiNodeServer')
         polyglot.start()
         control = Controller(polyglot)
         control.runForever()
