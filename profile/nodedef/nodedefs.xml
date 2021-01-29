@@ -16,20 +16,14 @@
             </accepts>
         </cmds>
     </nodeDef>
-    <nodeDef id="TWINKLY_LIGHT" nls="MGR">
+    <nodeDef id="UNIFI_DEVICE" nls="MGR">
         <editors />
         <sts>
-            <st id="ST" editor="MONOFF" />
-            <st id="GV1" editor="MCLBRI" /> <!-- Brightness -->
+            <st id="GV1" editor="bool" />
         </sts>
         <cmds>
             <sends />
             <accepts>
-                <cmd id="DON" />
-                <cmd id="DOF" />
-                <cmd id="SET_BRI">
-                    <p id="" editor="MCLBRI" init="GV1" />
-                </cmd>
             </accepts>
         </cmds>
     </nodeDef>
