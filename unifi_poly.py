@@ -114,7 +114,7 @@ class Controller(polyinterface.Controller):
             self.addNode(Device(self,self.address, name , name, device ))
 
     def delete(self):
-        LOGGER.info('Deleting Twinkly')
+        LOGGER.info('Deleting Unifi')
 
     def check_profile(self):
         self.profile_info = get_profile_info(LOGGER)
