@@ -6,7 +6,7 @@
     "install": "install.sh",
     "shortPoll": "90",
     "longPoll": "600",
-    "description": "Presence detection of device on Unifi network.",
+    "description": "UniFi Device Network Presence Detection.",
     "notice": "https://github.com/therealmysteryman/udi-presenceUnifi-polyglot/blob/master/LICENSE",
     "credits": [
         {
