@@ -112,7 +112,7 @@ class Controller(polyinterface.Controller):
 
     def discover(self, *args, **kwargs):
         
-        ctrl = unifictl(self.unifi_host,self.unifi_userid,self.unifi_password,self.unifi_port,site_id=self.unifi_siteid,ssl_verify=False)
+        ctrl = unifictl(self.unifi_host,self.unifi_userid,self.unifi_password,self.unifi_port,site_id=self.unifi_siteid,ssl_verify=False,version='unifiOS')
         
         for netdevice in self.mac_device.split(','):
             name =  netdevice.replace(":","") 
