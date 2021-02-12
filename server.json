@@ -12,8 +12,8 @@
         {
             "title": "UnifiPresence: A Polyglot v2 interface to Unifi Controller",
             "author": "AutomationGeek",
-            "version": "2.0.0",
-            "date": "January 29, 2021",
+            "version": "2.0.1",
+            "date": "February 12, 2021",
             "source": "https://github.com/therealmysteryman/udi-presenceUnifi-polyglot",
             "license": "https://github.com/therealmysteryman/udi-presenceUnifi-polyglot/blob/master/README.md"
         },
