@@ -13,7 +13,7 @@ import json
 import sys
 from urllib.parse import quote
 from copy import deepcopy
-from Unifi-websocket-interface.controller import Controller as unifictl
+from unifi_api_controller import Controller as unifictl
 
 
 
