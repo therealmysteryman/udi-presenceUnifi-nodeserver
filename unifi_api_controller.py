@@ -6,6 +6,10 @@ import time
 import warnings
 
 '''
+Source : https://github.com/NickWaterton/Unifi-websocket-interface/blob/master/controller.py
+'''
+
+'''
 see https://ubntwiki.com/products/software/unifi-controller/api for api details
 '''
 
