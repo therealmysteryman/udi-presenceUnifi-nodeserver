@@ -13,7 +13,9 @@ import json
 import sys
 from urllib.parse import quote
 from copy import deepcopy
-from pyunifi.controller import Controller as unifictl
+from Unifi-websocket-interface.controller import Controller as unifictl
+
+
 
 LOGGER = polyinterface.LOGGER
 SERVERDATA = json.load(open('server.json'))
@@ -112,7 +114,7 @@ class Controller(polyinterface.Controller):
 
     def discover(self, *args, **kwargs):
         
-        ctrl = unifictl(self.unifi_host,self.unifi_userid,self.unifi_password,self.unifi_port,site_id=self.unifi_siteid,ssl_verify=False,version='unifiOS')
+        ctrl = unifictl(self.unifi_host,self.unifi_userid,self.unifi_password,self.unifi_port,site_id=self.unifi_siteid,ssl_verify=False)
         
         for netdevice in self.mac_device.split(','):
             name =  netdevice.replace(":","") 
