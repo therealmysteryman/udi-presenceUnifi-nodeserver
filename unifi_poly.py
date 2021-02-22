@@ -4,18 +4,16 @@
 This is a NodeServer for Unifi Device Detection written by automationgeek (Jean-Francois Tremblay)
 based on the NodeServer template for Polyglot v2 written in Python2/3 by Einstein.42 (James Milne) milne.james@gmail.com
 """
-
 import polyinterface
 import hashlib
 import warnings 
 import time
 import json
 import sys
-from urllib.parse import quote
 from copy import deepcopy
+from urllib.parse import quote
+from pushover import init, Client
 from unifi_api_controller import Controller as unifictl
-
-
 
 LOGGER = polyinterface.LOGGER
 SERVERDATA = json.load(open('server.json'))
@@ -45,6 +43,9 @@ class Controller(polyinterface.Controller):
         self.unifi_password = ""
         self.unifi_siteid = ""
         self.mac_device = ""
+        self.poToken = ""
+        self.poUserKey = ""
+        self.lstUsers = []
 
     def start(self):
         LOGGER.info('Started Unifi for v2 NodeServer version %s', str(VERSION))
@@ -73,13 +74,23 @@ class Controller(polyinterface.Controller):
             if 'unifi_siteid' in self.polyConfig['customParams']:
                 self.unifi_siteid = self.polyConfig['customParams']['unifi_siteid']
             else:
-                self.unifi_siteid = "default"  
-                
+                self.unifi_siteid = "default"              
+            
+            if 'poToken' in self.polyConfig['customParams']:
+                self.poToken = self.polyConfig['customParams']['poToken']
+            else:
+                self.poToken = ""
+
+            if 'poUserKey' in self.polyConfig['customParams']:
+                self.poUserKey = self.polyConfig['customParams']['poUserKey']
+            else:
+                self.poUserKey = ""
+      
             if 'mac_device' in self.polyConfig['customParams']:
                 self.mac_device = self.polyConfig['customParams']['mac_device']
             else:
                 self.mac_device = ""      
-                                
+          
             if self.unifi_host == "" or self.unifi_userid == "" or self.unifi_password == "" or self.mac_device == "" :
                 LOGGER.error('Unifi requires \'unifi_host\' \'unifi_userid\' \'unifi_password\' \'mac_device\' parameters to be specified in custom configuration.')
                 return False
@@ -97,6 +108,7 @@ class Controller(polyinterface.Controller):
                 self.nodes[node].update()
                 
     def longPoll(self):
+        #self._newUsers()
         self.heartbeat()
         
     def query(self):
@@ -114,8 +126,11 @@ class Controller(polyinterface.Controller):
 
     def discover(self, *args, **kwargs):
         
-        ctrl = unifictl(self.unifi_host,self.unifi_userid,self.unifi_password,self.unifi_port,site_id=self.unifi_siteid,ssl_verify=False)
+        self.ctrl = unifictl(self.unifi_host,self.unifi_userid,self.unifi_password,self.unifi_port,site_id=self.unifi_siteid,ssl_verify=False)
         
+        #for user in self.ctrl.get_users() :
+        #    self.lstUsers.append(user["mac"])
+            
         for netdevice in self.mac_device.split(','):
             name =  netdevice.replace(":","") 
             self.addNode(NetDevice(self,self.address,name,name,ctrl,netdevice ))
@@ -142,7 +157,25 @@ class Controller(polyinterface.Controller):
     def install_profile(self,command):
         LOGGER.info("install_profile:")
         self.poly.installprofile()
+    
+    def _newUsers(self):
+        lstCurUsers = []
+        for user in self.ctrl.get_users() :
+            lstCurUsers.append(user["mac"])
 
+        lstNewUserFound = list(set(self.lstUsers) - set(lstCurUsers))
+
+        if ( len(lstNewUserFound) ) :
+            self._sentPushOver(''.join(lstNewUserFound))
+            LOGGER.info("New users found :" + ' '.join(lstNewUserFound) )
+            self.lstUser = lstCurUsers
+        else:
+             LOGGER.info("No new users found")
+
+    def _sentPushOver(self,message):
+        init(self.poToken)
+        Client(self.poUserKey).send_message(message, title="UniFi new users found")
+        
     id = 'controller'
     commands = {
         'QUERY': query,
