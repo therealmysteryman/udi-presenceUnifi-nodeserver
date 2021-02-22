@@ -46,6 +46,7 @@ class Controller(polyinterface.Controller):
         self.poToken = ""
         self.poUserKey = ""
         self.lstUsers = []
+        self.ctrl = None
 
     def start(self):
         LOGGER.info('Started Unifi for v2 NodeServer version %s', str(VERSION))
@@ -133,7 +134,7 @@ class Controller(polyinterface.Controller):
             
         for netdevice in self.mac_device.split(','):
             name =  netdevice.replace(":","") 
-            self.addNode(NetDevice(self,self.address,name,name,ctrl,netdevice ))
+            self.addNode(NetDevice(self,self.address,name,name,self.ctrl,netdevice ))
 
     def delete(self):
         LOGGER.info('Deleting Unifi')
