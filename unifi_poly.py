@@ -169,7 +169,7 @@ class Controller(polyinterface.Controller):
         if ( len(lstNewUserFound) ) :
             self._sentPushOver(''.join(lstNewUserFound))
             LOGGER.info("New users found :" + ' '.join(lstNewUserFound) )
-            self.lstUser = lstCurUsers
+            self.lstUser = lstCurUsers.copy()
         else:
              LOGGER.info("No new users found")
 
